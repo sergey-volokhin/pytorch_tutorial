@@ -1,9 +1,10 @@
-# from google.colab import drive
-# drive.mount('/content/drive', force_remount=False)
+from google.colab import drive
+drive.mount('/content/drive', force_remount=False)
 
 from keras_preprocessing.text import Tokenizer
 from keras_preprocessing.sequence import pad_sequences
 from sklearn.model_selection import train_test_split
+from sklearn.utils import compute_class_weight
 
 import torch.utils.data as data_utils
 import torch.functional as F
@@ -16,6 +17,8 @@ if torch.cuda.is_available():
     device = 'cuda'
 else:
     device = 'cpu'
+
+torch.manual_seed(42)
 
 # 1-layered LSTM with word embeddings
 class LSTM(nn.Module):
@@ -47,8 +50,8 @@ class LSTM(nn.Module):
 
 # process Alexa data -> output X and Y
 def process_data():
-    # path = '/content/drive/My Drive/Colab Notebooks/alexa_toy.json'
-    path = os.getcwd() + '/alexa_toy.json'
+    path = '/content/drive/My Drive/Colab Notebooks/alexa_toy.json'
+    # path = os.getcwd() + '/alexa_toy.json'
 
     with open(path) as f:
         data = json.load(f)
@@ -71,9 +74,9 @@ def process_data():
     tokenizer = Tokenizer()
     tokenizer.fit_on_texts(text)
     text = tokenizer.texts_to_sequences(text)
-    text = pad_sequences(text, maxlen=100)
+    text = pad_sequences(text, maxlen=50)
 
-    train_x, test_x, train_y, test_y = train_test_split(text, label, test_size=0.1, shuffle=False, random_state=10)
+    train_x, test_x, train_y, test_y = train_test_split(text, label, test_size=0.05, shuffle=False, random_state=42)
     print ('training size : {} \t test size : {}'.format(len(train_y), len(test_y)))
     return train_x, test_x, train_y, test_y, tokenizer
 
@@ -83,7 +86,7 @@ def load_data(x, y):
     tensor_x = torch.tensor(x, device=device, dtype=torch.long)
     tensor_y = torch.tensor(y, device=device, dtype=torch.long)
     dataset = data_utils.TensorDataset(tensor_x, tensor_y)
-    loader = data_utils.DataLoader(dataset=dataset, shuffle=True, batch_size=32, num_workers=4)
+    loader = data_utils.DataLoader(dataset=dataset, shuffle=True, batch_size=32)
     return loader
 
 
@@ -104,12 +107,13 @@ def train():
     train_loader = load_data(train_x, train_y)
     test_loader = load_data(test_x, test_y)
     vocab_size = len(tokenizer.word_index) + 1
+    class_weights = compute_class_weight(class_weight='balanced', y=train_y, classes=np.unique(train_y))
 
     # init models
     model = LSTM(embedding_dim=50, hidden_dim=25, vocab_size=vocab_size, output_size=len(np.unique(train_y)))
     model = model.to(device)
-    optimizer = torch.optim.SGD(model.parameters(), lr=5e-4)
-    loss_func = nn.NLLLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
+    loss_func = nn.NLLLoss(weight=torch.tensor(class_weights, device=device, dtype=torch.float))
 
     for epoch in range(50):
         # train
@@ -123,7 +127,7 @@ def train():
             optimizer.step()
             train_loss += loss.item()
 
-            if i % 50 == 0 and i != 0:
+            if i % 100 == 0 and i != 0:
                 # validate
                 model.eval()
                 preds, labels = [], []
