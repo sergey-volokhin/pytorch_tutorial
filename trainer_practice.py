@@ -32,7 +32,7 @@ class LSTM(nn.Module):
         self.softmax = nn.LogSoftmax(dim=-1)
         self.dropout = nn.Dropout()
 
-    # forward pass --> receives tensor shape (batch_size, input_len
+    # forward pass --> receives tensor shape (batch_size, input_len)
     def forward(self, X):
         # TODO
         # implement forward pass using LSTM to output log probability of shape #(batch_size, output_size)
