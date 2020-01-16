@@ -1,5 +1,5 @@
-from google.colab import drive
-drive.mount('/content/drive', force_remount=False)
+# from google.colab import drive
+# drive.mount('/content/drive', force_remount=False)
 
 from keras_preprocessing.text import Tokenizer
 from keras_preprocessing.sequence import pad_sequences
@@ -29,25 +29,19 @@ class LSTM(nn.Module):
         self.softmax = nn.LogSoftmax(dim=-1)
         self.dropout = nn.Dropout()
 
-    # forward pass
+    # forward pass --> receives tensor shape (batch_size, input_len
     def forward(self, X):
-        input_tensor = X  #(batch_size, input_len)
-        input_tensor = self.word_embeddings(input_tensor)  #(batch_size, input_len, emb_dim)
-        _, (last_state, _) = self.lstm(input_tensor)  #(1, batch_size, hidden_dim)
-        last_state = torch.squeeze(last_state, dim=0)  #(batch_size, hidden_dim)
-
-        output = self.linear_1(last_state)
-        output = self.tanh(output)
-        output = self.dropout(output)  #(batch_size, output_size*2)
-
-        output = self.linear_2(output)
-        output = self.softmax(output)  #(batch_size, output_size)
-        return output
+        # TODO
+        # implement forward pass using LSTM to output log probability of shape #(batch_size, output_size)
+        # using self.softmax() at the end
+        dummy_output = torch.ones(size=(X.shape[0], 8), requires_grad=True)  # this is a dummy output
+        return dummy_output
 
 
 # process Alexa data -> output X and Y
 def process_data():
-    path = '/content/drive/My Drive/Colab Notebooks/alexa_toy.json'
+    # path = '/content/drive/My Drive/Colab Notebooks/alexa_toy.json'
+    path = os.getcwd() + '/alexa_toy.json'
 
     with open(path) as f:
         data = json.load(f)
@@ -82,7 +76,7 @@ def load_data(x, y):
     tensor_x = torch.tensor(x, device=device, dtype=torch.long)
     tensor_y = torch.tensor(y, device=device, dtype=torch.long)
     dataset = data_utils.TensorDataset(tensor_x, tensor_y)
-    loader = data_utils.DataLoader(dataset=dataset, shuffle=True, batch_size=32)
+    loader = data_utils.DataLoader(dataset=dataset, shuffle=True, batch_size=32, num_workers=4)
     return loader
 
 
