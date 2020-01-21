@@ -19,15 +19,14 @@ class simpleCF(nn.Module):
 		item_emb = self.item_emb(item)
 		concat = torch.cat((user_emb, item_emb), -1)
 
-		x = self.dropout(concat)
 		x = self.linear_1(x)
 		x = self.relu(x)
-
 		x = self.dropout(x)
+
 		x = self.linear_2(x)
 		x = self.relu(x)
-
 		x = self.dropout(x)
+
 		x = self.linear_3(x)
 		x = x.view(-1)
 		return x
