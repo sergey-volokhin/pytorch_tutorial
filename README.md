@@ -6,7 +6,6 @@ Otherwise, if using Google Colab, download the repo and upload alexa toy data to
 
 The slides are also uploaded for reference.
 
-### TODOs
-1. Inside trainer_practice.py, try implementing the forward pass inside LSTM class. The output dimension should be (batch_size, output_size). If you are stuck, try looking at the code inside trainer_full.py
+Day 1 - PyTorch Basics and LSTM
 
-2. Once you are comfortable, try modifying the LSTM class to bidirectional or 2-layered architecture. These are additional parameter values for the LSTM module in PyTorch, but you need to modify the input dimensions of linear layers to accept new output from your LSTM. The output dimension should be identical.
+Day 2 - Movie ratings prediction using Neural Collaborative Filtering
