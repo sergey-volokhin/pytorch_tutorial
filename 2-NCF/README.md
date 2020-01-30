@@ -1,19 +1,19 @@
 # Day 2 - Neural Collaborative Filtering (NCF)
 
-#### Simple NCF
+## Model: Simple NCF
 ![Simplified NCF](NCF_simple.png)
 
-#### Full NCF
+## Model: Full NCF
 ![Simplified NCF](NCF_full.png)
 
 
 
 
-### TODOs
+## TODOs
 1. Inside practice.py, try implementing class simpleCF. simpleCF receives a batch input of users and items. Convert two ID inputs into embedding vectors, feed to 3-layered MLP and directly predict ratings. The output of this model returns a tensor of predicted ratings, with shape (batch_input). If you achieve MAP <= 0.9, it is working. 
 
 
-### Movie ratings prediction (Full NCF)
+## Movie ratings prediction (Full NCF)
 | Epoch | MAE |
 | :---: | :---: |
 | 1 | 0.8815115094184875 |
