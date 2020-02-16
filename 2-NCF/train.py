@@ -112,6 +112,13 @@ def process_data(device, batch_size):
     num_item = len(all_data['movieID'].unique()) + 1
 
     # convert input to torch tensors
+    for _, columnData in train_data.iteritems():
+        try:
+            torch.tensor(columnData.values, device=device, dtype=torch.float)
+        except:
+            print(_)
+
+    raise
     train_tensors = [torch.tensor(columnData.values, device=device, dtype=torch.float) for _, columnData in train_data.iteritems()]
     test_tensors = [torch.tensor(columnData.values, device=device, dtype=torch.float) for _, columnData in test_data.iteritems()]
 
