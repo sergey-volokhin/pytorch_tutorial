@@ -115,8 +115,8 @@ def process_data(device, batch_size):
     for _, columnData in train_data.iteritems():
         torch.tensor(columnData.values, device=device, dtype=torch.float)
 
-    train_tensors = [torch.tensor(columnData.values, device=device, dtype=torch.float) for _, columnData in train_data.iteritems()]
-    test_tensors = [torch.tensor(columnData.values, device=device, dtype=torch.float) for _, columnData in test_data.iteritems()]
+    train_tensors = [torch.tensor(train_data.iteritems()[0][1].values, device=device), torch.tensor(train_data.iteritems()[1][1].values, device=device)] + [torch.tensor(columnData.values, device=device, dtype=torch.float) for _, columnData in train_data.iteritems()[2:]]
+    test_tensors = [torch.tensor(test_data.iteritems()[0][1].values, device=device), torch.tensor(test_data.iteritems()[1][1].values, device=device)] + [torch.tensor(columnData.values, device=device, dtype=torch.float) for _, columnData in test_data.iteritems()[2:]]
 
     # convert tensors to dataloader
     train_dataset = data.TensorDataset(*train_tensors)
