@@ -1,8 +1,6 @@
 from tqdm import tqdm
 from sklearn.metrics import mean_absolute_error
-from neuralCF import NCF
-from practice import simpleCF
-
+import argparse
 import numpy as np
 import pandas as pd
 from gensim import models
@@ -10,7 +8,8 @@ from gensim import models
 import torch
 import torch.nn as nn
 import torch.utils.data as data
-import os
+
+from practice import simpleCF
 
 '''
 there are >95000 actors, >4000 directors, >5000 tags.
@@ -31,8 +30,15 @@ print('training on device:{}'.format(device.upper()))
     so please download it and gunzip it (https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit)
     and specify the path to it in path_to_word2vec variable
 '''
-path_to_word2vec = '/media/thejdxfh/Windows/Users/volok/Desktop/GoogleNews-vectors-negative300.bin'
+parser = argparse.ArgumentParser()
+parser.add_argument('--path-to-word2vec', '-p', required=True)
+args = parser.parse_args()
+
+path_to_word2vec = args.path_to_word2vec
+# path_to_word2vec = '/media/thejdxfh/Windows/Users/volok/Desktop/GoogleNews-vectors-negative300.bin'
+print('loading word2vec')
 w = models.KeyedVectors.load_word2vec_format(path_to_word2vec, binary=True)
+print('word2vec loaded')
 
 
 '''
@@ -57,7 +63,7 @@ def get_avg_embedding_for_movie(row):
 def process_data(device, batch_size):
     global groupped
 
-    datapath = '../../data/'
+    datapath = '../data/'
     hetrec = datapath + 'hetrec2011-movielens-2k-v2/'
     user_item_matrix = pd.read_csv(datapath + 'ml-latest-small/ratings.csv', usecols=[0, 1, 2]).rename(columns={'movieId': 'movieID'})
     movies = pd.read_csv(datapath + 'ml-latest-small/movies.csv', usecols=[0, 1])
