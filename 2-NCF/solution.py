@@ -22,6 +22,8 @@ class simpleCF(nn.Module):
         for i in features:
             dims.add(i.size())
         print(dims)
+        print(user_emb.size())
+        print(item_emb.size())
         concat = torch.cat((user_emb, item_emb, *features), -1)
 
         x = self.linear_1(concat)
