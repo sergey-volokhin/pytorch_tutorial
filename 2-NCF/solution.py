@@ -17,9 +17,9 @@ class simpleCF(nn.Module):
     def forward(self, user, item, *features):
 
         user_emb = self.user_emb(user)
-        print(item)
         item_emb = self.item_emb(item)
-        print(item_emb)
+        for i in features:
+            print(features)
         concat = torch.cat((user_emb, item_emb, *features), -1)
 
         x = self.linear_1(concat)
