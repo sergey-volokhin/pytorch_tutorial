@@ -32,6 +32,7 @@ print('training on device:{}'.format(device.upper()))
 '''
 parser = argparse.ArgumentParser()
 parser.add_argument('--path-to-word2vec', '-p', required=True)
+parser.add_argument('--create-features', '-c', default=True, type=bool)
 args = parser.parse_args()
 
 path_to_word2vec = args.path_to_word2vec
@@ -51,7 +52,6 @@ def get_avg_embedding_for_movie(row):
 
     result = []
     try:
-        print(row['movieID'])
         for _, group in groupped.get_group(row['movieID']).iterrows():
             text = np.array([w[word] for word in group['value'].split() if word in w.vocab])
             if text.size > 0:
@@ -68,34 +68,38 @@ def process_data(device, batch_size):
 
     datapath = '../data/'
     hetrec = datapath + 'hetrec2011-movielens-2k-v2/'
-    user_item_matrix = pd.read_csv(datapath + 'ml-latest-small/ratings.csv', usecols=[0, 1, 2]).rename(columns={'movieId': 'movieID'})
-    movies = pd.read_csv(datapath + 'ml-latest-small/movies.csv', usecols=[0, 1])
 
-    # get rt metadata
-    movies_meta = pd.read_csv(hetrec + 'movies.dat', sep='\t', encoding='raw_unicode_escape').rename(columns={'id': 'movieID'}).drop(['spanishTitle', 'imdbID', 'title', 'imdbPictureURL', 'rtID', 'rtAllCriticsNumReviews', 'rtTopCriticsNumReviews', 'rtPictureURL'], axis=1)
-    movies_meta = movies_meta[movies_meta['movieID'].isin(user_item_matrix['movieID'].unique())]
+    if args.create_features:
+        user_item_matrix = pd.read_csv(datapath + 'ml-latest-small/ratings.csv', usecols=[0, 1, 2]).rename(columns={'movieId': 'movieID'})
+        movies = pd.read_csv(datapath + 'ml-latest-small/movies.csv', usecols=[0, 1])
 
-    # get the average tags embeddings
-    movie_tags = pd.read_csv(hetrec + 'movie_tags.dat', sep='\t')
-    tags = pd.read_csv(hetrec + 'tags.dat', sep='\t', encoding='raw_unicode_escape').rename(columns={'id': 'tagID'})
-    movie_tags = pd.merge(movie_tags, tags, on='tagID').sort_values(by=['movieID', 'tagID']).drop(['tagID'], axis=1)
-    groupped = movie_tags.groupby('movieID')
-    embedded_tags = pd.DataFrame.from_records(movies_meta.apply(get_avg_embedding_for_movie, axis=1), columns=[f'w2v_{i}' for i in range(1, 301)])
-    movies_meta = pd.concat([movies_meta, embedded_tags], axis=1)
+        # get rt metadata
+        movies_meta = pd.read_csv(hetrec + 'movies.dat', sep='\t', encoding='raw_unicode_escape').rename(columns={'id': 'movieID'}).drop(['spanishTitle', 'imdbID', 'title', 'imdbPictureURL', 'rtID', 'rtAllCriticsNumReviews', 'rtTopCriticsNumReviews', 'rtPictureURL'], axis=1)
+        movies_meta = movies_meta[movies_meta['movieID'].isin(user_item_matrix['movieID'].unique())]
 
-    user_item_matrix = pd.merge(user_item_matrix, movies_meta, on='movieID').sort_values(by=['userId', 'movieID'])
+        # get the average tags embeddings
+        movie_tags = pd.read_csv(hetrec + 'movie_tags.dat', sep='\t')
+        tags = pd.read_csv(hetrec + 'tags.dat', sep='\t', encoding='raw_unicode_escape').rename(columns={'id': 'tagID'})
+        movie_tags = pd.merge(movie_tags, tags, on='tagID').sort_values(by=['movieID', 'tagID']).drop(['tagID'], axis=1)
+        groupped = movie_tags.groupby('movieID')
+        embedded_tags = pd.DataFrame.from_records(movies_meta.apply(get_avg_embedding_for_movie, axis=1), columns=[f'w2v_{i}' for i in range(1, 301)])
+        movies_meta = pd.concat([movies_meta, embedded_tags], axis=1)
 
-    # get a one-hot-encode-esque matrix of genres, then join on them
-    movie_genres = pd.read_csv(hetrec + 'movie_genres.dat', sep='\t').pivot_table(index=['movieID'], columns=['genre'], aggfunc=[len], fill_value=0)
-    movie_genres.columns = movie_genres.columns.droplevel(0)
-    movie_genres = movie_genres.reset_index()
-    user_item_matrix = pd.merge(user_item_matrix, movie_genres, on='movieID')
+        user_item_matrix = pd.merge(user_item_matrix, movies_meta, on='movieID').sort_values(by=['userId', 'movieID'])
 
-    # get a one-hot-encode matrix of countries, then join on them
-    movie_countries = pd.get_dummies(pd.read_csv(hetrec + 'movie_countries.dat', sep='\t'))
-    user_item_matrix = pd.merge(user_item_matrix, movie_countries, on='movieID').sort_values(by=['userId', 'movieID'])
+        # get a one-hot-encode-esque matrix of genres, then join on them
+        movie_genres = pd.read_csv(hetrec + 'movie_genres.dat', sep='\t').pivot_table(index=['movieID'], columns=['genre'], aggfunc=[len], fill_value=0)
+        movie_genres.columns = movie_genres.columns.droplevel(0)
+        movie_genres = movie_genres.reset_index()
+        user_item_matrix = pd.merge(user_item_matrix, movie_genres, on='movieID')
 
-    user_item_matrix.to_csv('user_item_matrix.tsv', sep='\t', index=False)
+        # get a one-hot-encode matrix of countries, then join on them
+        movie_countries = pd.get_dummies(pd.read_csv(hetrec + 'movie_countries.dat', sep='\t'))
+        user_item_matrix = pd.merge(user_item_matrix, movie_countries, on='movieID').sort_values(by=['userId', 'movieID'])
+
+        user_item_matrix.to_csv('user_item_matrix.tsv', sep='\t', index=False)
+    else:
+        user_item_matrix = pd.read_csv('user_item_matrix.tsv', sep='\t')
 
     give_test = lambda obj: obj.loc[np.random.choice(obj.index, len(obj.index) // 10), :]
     test_data = user_item_matrix.groupby('userId', as_index=False).apply(give_test).reset_index(level=0, drop=True)
@@ -107,8 +111,8 @@ def process_data(device, batch_size):
     num_item = len(all_data['movieID'].unique()) + 1
 
     # convert input to torch tensors
-    train_tensors = [torch.tensor(columnData.values, device=device) for _, columnData in train_data.iteritems()]
-    test_tensors = [torch.tensor(columnData.values, device=device) for _, columnData in test_data.iteritems()]
+    train_tensors = [torch.tensor(columnData.values, device=device, dtype=torch.float) for _, columnData in train_data.iteritems()]
+    test_tensors = [torch.tensor(columnData.values, device=device, dtype=torch.float) for _, columnData in test_data.iteritems()]
 
     # convert tensors to dataloader
     train_dataset = data.TensorDataset(*train_tensors)
