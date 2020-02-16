@@ -75,7 +75,7 @@ def process_data(device, batch_size):
         movies = pd.read_csv(datapath + 'ml-latest-small/movies.csv', usecols=[0, 1])
 
         # get rt metadata
-        movies_meta = pd.read_csv(hetrec + 'movies.dat', sep='\t', encoding='raw_unicode_escape').rename(columns={'id': 'movieID'}).drop(['spanishTitle', 'imdbID', 'title', 'imdbPictureURL', 'rtID', 'rtAllCriticsNumReviews', 'rtTopCriticsNumReviews', 'rtPictureURL'], axis=1)
+        movies_meta = pd.read_csv(hetrec + 'movies.dat', sep='\t', encoding='raw_unicode_escape', na_values='\N').rename(columns={'id': 'movieID'}).drop(['spanishTitle', 'imdbID', 'title', 'imdbPictureURL', 'rtID', 'rtAllCriticsNumReviews', 'rtTopCriticsNumReviews', 'rtPictureURL'], axis=1).fillna(0)
         movies_meta = movies_meta[movies_meta['movieID'].isin(user_item_matrix['movieID'].unique())]
 
         # get the average tags embeddings
