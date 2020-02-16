@@ -51,11 +51,14 @@ def get_avg_embedding_for_movie(row):
 
     result = []
     try:
+        print(row['movieID'])
         for _, group in groupped.get_group(row['movieID']).iterrows():
             text = np.array([w[word] for word in group['value'].split() if word in w.vocab])
             if text.size > 0:
                 result.append(text.mean(axis=0) * group['tagWeight'])
     except KeyError:
+        return np.zeros(300)
+    if len(result)<1:
         return np.zeros(300)
     return np.mean(result, axis=0)
 
