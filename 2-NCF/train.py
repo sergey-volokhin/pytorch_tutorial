@@ -104,7 +104,7 @@ def process_data(device, batch_size):
 
     # remapping movieIDs so that torch stop yelling at me
     new_dict = {a: b for b, a in enumerate(sorted(user_item_matrix['movieID'].unique()))}
-    user_item_matrix['movieID'] = user_item_matrix['movieID'].map(new_dict).head()
+    user_item_matrix['movieID'] = user_item_matrix['movieID'].map(new_dict)
 
     give_test = lambda obj: obj.loc[np.random.choice(obj.index, len(obj.index) // 10), :]
     test_data = user_item_matrix.groupby('userId', as_index=False).apply(give_test).reset_index(level=0, drop=True)
