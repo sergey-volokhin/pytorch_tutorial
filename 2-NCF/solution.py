@@ -14,10 +14,10 @@ class simpleCF(nn.Module):
         self.dropout = nn.Dropout()
         self.relu = nn.ReLU()
 
-    def forward(self, user, item):
+    def forward(self, user, item, *features):
         user_emb = self.user_emb(user)
         item_emb = self.item_emb(item)
-        concat = torch.cat((user_emb, item_emb), -1)
+        concat = torch.cat((user_emb, item_emb, *features), -1)
 
         x = self.linear_1(concat)
         x = self.relu(x)
