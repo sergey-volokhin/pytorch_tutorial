@@ -15,7 +15,10 @@ class simpleCF(nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, user, item, *features):
+
         user_emb = self.user_emb(user)
+        print(type(user))
+        print(user)
         item_emb = self.item_emb(item)
         concat = torch.cat((user_emb, item_emb, *features), -1)
 
