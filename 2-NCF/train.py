@@ -35,11 +35,12 @@ parser.add_argument('--path-to-word2vec', '-p', required=True)
 parser.add_argument('--create-features', '-c', default=True, type=bool)
 args = parser.parse_args()
 
-path_to_word2vec = args.path_to_word2vec
-# path_to_word2vec = '/media/thejdxfh/Windows/Users/volok/Desktop/GoogleNews-vectors-negative300.bin'
-print('loading word2vec')
-w = models.KeyedVectors.load_word2vec_format(path_to_word2vec, binary=True)
-print('word2vec loaded')
+if args.create_features:
+    path_to_word2vec = args.path_to_word2vec
+    # path_to_word2vec = '/media/thejdxfh/Windows/Users/volok/Desktop/GoogleNews-vectors-negative300.bin'
+    print('loading word2vec')
+    w = models.KeyedVectors.load_word2vec_format(path_to_word2vec, binary=True)
+    print('word2vec loaded')
 
 
 '''
