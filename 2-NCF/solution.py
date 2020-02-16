@@ -19,7 +19,7 @@ class simpleCF(nn.Module):
         user_emb = self.user_emb(user)
         item_emb = self.item_emb(item)
         for i in features:
-            print(features)
+            print(i)
         concat = torch.cat((user_emb, item_emb, *features), -1)
 
         x = self.linear_1(concat)
