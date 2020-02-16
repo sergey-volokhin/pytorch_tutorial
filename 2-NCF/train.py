@@ -143,7 +143,7 @@ def train(lr, batch_size, output_dim=32):
         for features in tqdm(train_loader, total=len(train_loader)):
             label = features[2].float().to(device)
             model.zero_grad()
-            prediction = model([feature.to(device) for feature in features[:2] + features[3:]])
+            prediction = model(*[feature.to(device) for feature in features[:2] + features[3:]])
             loss = loss_function(prediction, label)
             loss.backward()
             optimizer.step()
@@ -153,7 +153,7 @@ def train(lr, batch_size, output_dim=32):
         model.eval()
         # for user, item, label in test_loader:
         for features in test_loader:
-            prediction = model([feature.to(device) for feature in features[:2] + features[3:]])
+            prediction = model(*[feature.to(device) for feature in features[:2] + features[3:]])
             label = features[2].float().detach().cpu().numpy()
             prediction = prediction.float().detach().cpu().numpy()
             test_mae.append(mean_absolute_error(y_pred=prediction, y_true=label))
