@@ -115,8 +115,8 @@ def process_data(device, batch_size):
     for _, columnData in train_data.iteritems():
         torch.tensor(columnData.values, device=device, dtype=torch.float)
 
-    train_tensors = [torch.tensor(train_data['userId'].values, device=device), torch.tensor(train_data['movieID'].values, device=device)] + [torch.tensor(columnData.values, device=device, dtype=torch.float) for _, columnData in train_data.iteritems()[2:]]
-    test_tensors = [torch.tensor(test_data['userId'].values, device=device), torch.tensor(test_data['movieID'].values, device=device)] + [torch.tensor(columnData.values, device=device, dtype=torch.float) for _, columnData in test_data.iteritems()[2:]]
+    train_tensors = [torch.tensor(train_data['userId'].values, device=device), torch.tensor(train_data['movieID'].values, device=device)] + [torch.tensor(columnData.values, device=device, dtype=torch.float) for columns_name, columnData in train_data.iteritems() if column_name not in ['movieID', 'userId']]
+    test_tensors = [torch.tensor(test_data['userId'].values, device=device), torch.tensor(test_data['movieID'].values, device=device)] + [torch.tensor(columnData.values, device=device, dtype=torch.float) for column_name, columnData in test_data.iteritems() if column_name not in ['movieID', 'userId']]
 
     # convert tensors to dataloader
     train_dataset = data.TensorDataset(*train_tensors)
