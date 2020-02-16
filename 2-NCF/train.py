@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.utils.data as data
 
-from practice import simpleCF
+from solution import simpleCF
 
 '''
 there are >95000 actors, >4000 directors, >5000 tags.
