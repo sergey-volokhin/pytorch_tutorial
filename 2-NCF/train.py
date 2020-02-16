@@ -32,7 +32,7 @@ print('training on device:{}'.format(device.upper()))
 '''
 parser = argparse.ArgumentParser()
 parser.add_argument('--path-to-word2vec', '-p', required=True)
-parser.add_argument('--create-features', '-c', default=True, type=bool)
+parser.add_argument('--create-features', '-c', action='store_true')
 args = parser.parse_args()
 
 if args.create_features:
