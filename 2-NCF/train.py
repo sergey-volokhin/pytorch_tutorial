@@ -70,37 +70,37 @@ def process_data(device, batch_size):
     datapath = '../data/'
     hetrec = datapath + 'hetrec2011-movielens-2k-v2/'
 
-    if args.create_features:
-        user_item_matrix = pd.read_csv(datapath + 'ml-latest-small/ratings.csv', usecols=[0, 1, 2]).rename(columns={'movieId': 'movieID'})
-        movies = pd.read_csv(datapath + 'ml-latest-small/movies.csv', usecols=[0, 1])
+    # if args.create_features:
+    #     user_item_matrix = pd.read_csv(datapath + 'ml-latest-small/ratings.csv', usecols=[0, 1, 2]).rename(columns={'movieId': 'movieID'})
+    #     movies = pd.read_csv(datapath + 'ml-latest-small/movies.csv', usecols=[0, 1])
 
-        # get rt metadata
-        movies_meta = pd.read_csv(hetrec + 'movies.dat', sep='\t', encoding='raw_unicode_escape', na_values='\\N').rename(columns={'id': 'movieID'}).drop(['spanishTitle', 'imdbID', 'title', 'imdbPictureURL', 'rtID', 'rtAllCriticsNumReviews', 'rtTopCriticsNumReviews', 'rtPictureURL'], axis=1).fillna(0)
-        movies_meta = movies_meta[movies_meta['movieID'].isin(user_item_matrix['movieID'].unique())]
+    #     # get rt metadata
+    #     movies_meta = pd.read_csv(hetrec + 'movies.dat', sep='\t', encoding='raw_unicode_escape', na_values='\\N').rename(columns={'id': 'movieID'}).drop(['spanishTitle', 'imdbID', 'title', 'imdbPictureURL', 'rtID', 'rtAllCriticsNumReviews', 'rtTopCriticsNumReviews', 'rtPictureURL'], axis=1).fillna(0)
+    #     movies_meta = movies_meta[movies_meta['movieID'].isin(user_item_matrix['movieID'].unique())]
 
-        # get the average tags embeddings
-        movie_tags = pd.read_csv(hetrec + 'movie_tags.dat', sep='\t')
-        tags = pd.read_csv(hetrec + 'tags.dat', sep='\t', encoding='raw_unicode_escape').rename(columns={'id': 'tagID'})
-        movie_tags = pd.merge(movie_tags, tags, on='tagID').sort_values(by=['movieID', 'tagID']).drop(['tagID'], axis=1)
-        groupped = movie_tags.groupby('movieID')
-        embedded_tags = pd.DataFrame.from_records(movies_meta.apply(get_avg_embedding_for_movie, axis=1), columns=[f'w2v_{i}' for i in range(1, 301)])
-        movies_meta = pd.concat([movies_meta, embedded_tags], axis=1)
+    #     # get the average tags embeddings
+    #     movie_tags = pd.read_csv(hetrec + 'movie_tags.dat', sep='\t')
+    #     tags = pd.read_csv(hetrec + 'tags.dat', sep='\t', encoding='raw_unicode_escape').rename(columns={'id': 'tagID'})
+    #     movie_tags = pd.merge(movie_tags, tags, on='tagID').sort_values(by=['movieID', 'tagID']).drop(['tagID'], axis=1)
+    #     groupped = movie_tags.groupby('movieID')
+    #     embedded_tags = pd.DataFrame.from_records(movies_meta.apply(get_avg_embedding_for_movie, axis=1), columns=[f'w2v_{i}' for i in range(1, 301)])
+    #     movies_meta = pd.concat([movies_meta, embedded_tags], axis=1)
 
-        user_item_matrix = pd.merge(user_item_matrix, movies_meta, on='movieID').sort_values(by=['userId', 'movieID'])
+    #     user_item_matrix = pd.merge(user_item_matrix, movies_meta, on='movieID').sort_values(by=['userId', 'movieID'])
 
-        # get a one-hot-encode-esque matrix of genres, then join on them
-        movie_genres = pd.read_csv(hetrec + 'movie_genres.dat', sep='\t').pivot_table(index=['movieID'], columns=['genre'], aggfunc=[len], fill_value=0)
-        movie_genres.columns = movie_genres.columns.droplevel(0)
-        movie_genres = movie_genres.reset_index()
-        user_item_matrix = pd.merge(user_item_matrix, movie_genres, on='movieID')
+    #     # get a one-hot-encode-esque matrix of genres, then join on them
+    #     movie_genres = pd.read_csv(hetrec + 'movie_genres.dat', sep='\t').pivot_table(index=['movieID'], columns=['genre'], aggfunc=[len], fill_value=0)
+    #     movie_genres.columns = movie_genres.columns.droplevel(0)
+    #     movie_genres = movie_genres.reset_index()
+    #     user_item_matrix = pd.merge(user_item_matrix, movie_genres, on='movieID')
 
-        # get a one-hot-encode matrix of countries, then join on them
-        movie_countries = pd.get_dummies(pd.read_csv(hetrec + 'movie_countries.dat', sep='\t'))
-        user_item_matrix = pd.merge(user_item_matrix, movie_countries, on='movieID').sort_values(by=['userId', 'movieID'])
+    #     # get a one-hot-encode matrix of countries, then join on them
+    #     movie_countries = pd.get_dummies(pd.read_csv(hetrec + 'movie_countries.dat', sep='\t'))
+    #     user_item_matrix = pd.merge(user_item_matrix, movie_countries, on='movieID').sort_values(by=['userId', 'movieID'])
 
-        user_item_matrix.to_csv('user_item_matrix.tsv', sep='\t', index=False)
-    else:
-        user_item_matrix = pd.read_csv('user_item_matrix.tsv', sep='\t')
+    #     user_item_matrix.to_csv('user_item_matrix.tsv', sep='\t', index=False)
+    # else:
+    #     user_item_matrix = pd.read_csv('user_item_matrix.tsv', sep='\t')
 
     # remapping movieIDs so that torch stop yelling at me
     new_dict = {a: b for b, a in enumerate(sorted(user_item_matrix['movieID'].unique()))}
@@ -134,7 +134,8 @@ def process_data(device, batch_size):
 def train(lr, batch_size, output_dim=32):
     train_loader, test_loader, user_num, item_num = process_data(device=device, batch_size=batch_size)
 
-    model = simpleCF(user_num, item_num, output_dim)
+    model = simpleCF(user_num, item_num, genre_num, country_num, tags_num, output_dim)
+    # def forward(self, user, item, genre, country, tags):
 
     model = model.to(device)
     loss_function = nn.MSELoss()
@@ -143,11 +144,17 @@ def train(lr, batch_size, output_dim=32):
     for epoch in range(1, 20):
         # training loop
         model.train()
-        # for user, item, label in tqdm(train_loader, total=len(train_loader)):
-        for features in tqdm(train_loader, total=len(train_loader)):
-            label = features[2].float().to(device)
+
+        for user, item, label, genre, country in tqdm(train_loader, total=len(train_loader)):
+            user = user.to(device)
+            item = item.to(device)
+            genre = genre.to(device)
+            country = country.to(device)
+
+            label = label.float().to(device)
             model.zero_grad()
-            prediction = model(features[0].to(device), features[1].to(device), *[feature.to(device) for feature in features[3:]])
+
+            prediction = model(user, item, genre, country)
             loss = loss_function(prediction, label)
             loss.backward()
             optimizer.step()
@@ -155,10 +162,15 @@ def train(lr, batch_size, output_dim=32):
         # eval loop
         test_mae = []
         model.eval()
-        # for user, item, label in test_loader:
-        for features in test_loader:
-            prediction = model(features[0].to(device), features[1].to(device), *[feature.to(device) for feature in features[3:]])
-            label = features[2].float().detach().cpu().numpy()
+
+        for user, item, label, genre, country in test_loader:
+            user = user.to(device)
+            item = item.to(device)
+            genre = genre.to(device)
+            country = country.to(device)
+
+            prediction = model(user, item, genre, country)
+            label = label.float().detach().cpu().numpy()
             prediction = prediction.float().detach().cpu().numpy()
             test_mae.append(mean_absolute_error(y_pred=prediction, y_true=label))
 
