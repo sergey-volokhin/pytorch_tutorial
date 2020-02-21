@@ -1,15 +1,15 @@
-from tqdm import tqdm
-from sklearn.metrics import mean_absolute_error
+# from tqdm import tqdm
+# from sklearn.metrics import mean_absolute_error
 import argparse
 import numpy as np
 import pandas as pd
 from gensim import models
 
-import torch
-import torch.nn as nn
-import torch.utils.data as data
+# import torch
+# import torch.nn as nn
+# import torch.utils.data as data
 
-from solution import simpleCF
+# from solution import simpleCF
 
 '''
 there are >95000 actors, >4000 directors, >5000 tags.
@@ -17,13 +17,13 @@ one-hot-encoding is not practical at this point, so we will not be using them as
 
 '''
 
-if torch.cuda.is_available():
-    device = 'cuda'
-else:
-    device = 'cpu'
-# torch.manual_seed(10)
-print('training on device:{}'.format(device.upper()))
-
+# if torch.cuda.is_available():
+#     device = 'cuda'
+# else:
+#     device = 'cpu'
+# # torch.manual_seed(10)
+# print('training on device:{}'.format(device.upper()))
+device = 'cpu'
 
 def process_data(device, batch_size):
     global groupped
@@ -38,6 +38,7 @@ def process_data(device, batch_size):
     movie_tags['list'] = movie_tags.apply(lambda row: [row['tagID']] * row['tagWeight'], axis=1)
     new_tags = movie_tags.groupby('movieID')['list'].sum()
     user_item_matrix['tags'] = user_item_matrix.apply(lambda row: new_tags.get(row['movieID']), axis=1)
+    user_item_matrix = user_item_matrix.dropna()
 
     movie_genres = pd.read_csv(hetrec + 'movie_genres.dat', sep='\t')
     movie_genres['list'] = movie_genres.apply(lambda row: [row['genre']], axis=1)
@@ -55,15 +56,17 @@ def process_data(device, batch_size):
     test_data = user_item_matrix.groupby('userId', as_index=False).apply(give_test).reset_index(level=0, drop=True)
     train_data = user_item_matrix[~user_item_matrix.index.isin(test_data.index)]
 
+    print("ALREADY HERE")
+
     # user item stats
-    all_data = user_item_matrix
-    print(user_item_matrix.head())
-    num_user = len(all_data['userId'].unique()) + 1
-    num_item = len(all_data['movieID'].unique()) + 1
-    num_country = len(all_data['country'].unique()) + 1
-    num_genre = len(all_data['genres'].sum()) + 1
-    num_tags = len(set(all_data['tags'].sum())) + 1
-    print(num_user, num_item, num_country, num_genre, num_tags)
+    num_user = len(user_item_matrix['userId'].unique()) + 1
+    num_item = len(user_item_matrix['movieID'].unique()) + 1
+    num_country = len(user_item_matrix['country'].unique()) + 1
+    num_genre = len(user_item_matrix['genres'].sum()) + 1
+    num_tags = len(set(user_item_matrix['tags'].sum())) + 1
+    print(f"{num_user=}, {num_item=}, {num_country=}, {num_genre=}, {num_tags=}")
+
+    print(set(user_item_matrix['genres'].sum()))
 
     # convert input to torch tensors
     for _, columnData in train_data.iteritems():
