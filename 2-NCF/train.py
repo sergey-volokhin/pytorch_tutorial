@@ -25,45 +25,6 @@ else:
 print('training on device:{}'.format(device.upper()))
 
 
-'''
-    i am using pre-trained Google News Word2Vec model for tags aggregating,
-    so please download it and gunzip it (https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit)
-    and specify the path to it in path_to_word2vec variable
-'''
-parser = argparse.ArgumentParser()
-parser.add_argument('--path-to-word2vec', '-p', required=True)
-parser.add_argument('--create-features', '-c', action='store_true')
-args = parser.parse_args()
-
-if args.create_features:
-    path_to_word2vec = args.path_to_word2vec
-    # path_to_word2vec = '/media/thejdxfh/Windows/Users/volok/Desktop/GoogleNews-vectors-negative300.bin'
-    print('loading word2vec')
-    w = models.KeyedVectors.load_word2vec_format(path_to_word2vec, binary=True)
-    print('word2vec loaded')
-
-
-'''
-    for each tag get average embeddings for each word,
-    multiply by the weight of that tag,
-    and take the average of all tags
-'''
-def get_avg_embedding_for_movie(row):
-    global groupped
-
-    result = []
-    try:
-        for _, group in groupped.get_group(row['movieID']).iterrows():
-            text = np.array([w[word] for word in group['value'].split() if word in w.vocab])
-            if text.size > 0:
-                result.append(text.mean(axis=0) * group['tagWeight'])
-    except KeyError:
-        return np.zeros(300)
-    if len(result) < 1:
-        return np.zeros(300)
-    return np.mean(result, axis=0)
-
-
 def process_data(device, batch_size):
     global groupped
 
@@ -96,11 +57,13 @@ def process_data(device, batch_size):
 
     # user item stats
     all_data = user_item_matrix
+    print(user_item_matrix.head())
     num_user = len(all_data['userId'].unique()) + 1
     num_item = len(all_data['movieID'].unique()) + 1
     num_country = len(all_data['country'].unique()) + 1
     num_genre = len(all_data['genres'].sum()) + 1
     num_tags = len(set(all_data['tags'].sum())) + 1
+    print(num_user, num_item, num_country, num_genre, num_tags)
 
     # convert input to torch tensors
     for _, columnData in train_data.iteritems():
