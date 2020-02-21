@@ -1,15 +1,15 @@
-# from tqdm import tqdm
-# from sklearn.metrics import mean_absolute_error
+from tqdm import tqdm
+from sklearn.metrics import mean_absolute_error
 import argparse
 import numpy as np
 import pandas as pd
 from gensim import models
 
-# import torch
-# import torch.nn as nn
-# import torch.utils.data as data
+import torch
+import torch.nn as nn
+import torch.utils.data as data
 
-# from solution import simpleCF
+from solution import simpleCF
 
 '''
 there are >95000 actors, >4000 directors, >5000 tags.
@@ -17,13 +17,13 @@ one-hot-encoding is not practical at this point, so we will not be using them as
 
 '''
 
-# if torch.cuda.is_available():
-#     device = 'cuda'
-# else:
-#     device = 'cpu'
-# # torch.manual_seed(10)
-# print('training on device:{}'.format(device.upper()))
-device = 'cpu'
+if torch.cuda.is_available():
+    device = 'cuda'
+else:
+    device = 'cpu'
+# torch.manual_seed(10)
+print('training on device:{}'.format(device.upper()))
+
 
 def process_data(device, batch_size):
     global groupped
