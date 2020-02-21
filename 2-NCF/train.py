@@ -45,7 +45,7 @@ def process_data(device, batch_size):
     user_item_matrix['genres'] = user_item_matrix.apply(lambda row: new_genres.get(row['movieID']), axis=1)
 
     countries = pd.read_csv(hetrec + 'movie_countries.dat', sep='\t')
-    user_item_matrix = pd.merge(user_item_matrix, countries, on='movieID').sort_values(by=['userId','movieID']).head()
+    user_item_matrix = pd.merge(user_item_matrix, countries, on='movieID').sort_values(by=['userId','movieID'])
 
     # remapping movieIDs so that torch stop yelling at me
     new_dict = {a: b for b, a in enumerate(sorted(user_item_matrix['movieID'].unique()))}
