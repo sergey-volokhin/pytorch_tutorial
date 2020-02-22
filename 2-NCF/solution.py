@@ -24,10 +24,7 @@ class simpleCF(nn.Module):
         genre_emb = torch.sum(self.genre_emb(genre), 1)
         country_emb = self.country_emb(country)
         tags_emb = torch.sum(self.tags_emb(tags), 1)
-        for i in [user_emb, item_emb, genre_emb, country_emb, tags_emb]:
-            print(i.shape)
         concat = torch.cat((user_emb, item_emb, genre_emb, country_emb, tags_emb), -1)
-        print('concat.shape', concat.shape)
         x = self.linear_1(concat)
         x = self.relu(x)
         x = self.dropout(x)
