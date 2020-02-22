@@ -90,7 +90,10 @@ def process_data(device, batch_size):
         # convert input to torch tensors
         for column_name, columnData in dataset.iteritems():
             try:
-                tensors.append(torch.tensor(columnData.values, device=device, dtype=torch.float))
+                if column_name == 'rating':
+                    tensors.append(torch.tensor(columnData.values, device=device, dtype=torch.float))
+                else:
+                    tensors.append(torch.tensor(columnData.values, device=device))
             except TypeError:
                 new_array = [list(i) for i in columnData.values]
                 tensors.append(torch.tensor(np.array(new_array), dtype=torch.int))
