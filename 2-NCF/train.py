@@ -87,7 +87,7 @@ def process_data(device, batch_size):
         try:
             torch.tensor(columnData.values, device=device, dtype=torch.float)
         except TypeError:
-            torch.tensor(columnData.values, device=device)
+            torch.from_numpy(columnData.values, device=device)
 
     train_tensors = [torch.tensor(train_data['userId'].values, device=device), torch.tensor(train_data['movieID'].values, device=device)] + [torch.tensor(columnData.values, device=device, dtype=torch.float) for column_name, columnData in train_data.iteritems() if column_name not in ['movieID', 'userId']]
     test_tensors = [torch.tensor(test_data['userId'].values, device=device), torch.tensor(test_data['movieID'].values, device=device)] + [torch.tensor(columnData.values, device=device, dtype=torch.float) for column_name, columnData in test_data.iteritems() if column_name not in ['movieID', 'userId']]
