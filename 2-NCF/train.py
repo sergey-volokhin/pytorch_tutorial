@@ -95,6 +95,7 @@ def process_data(device, batch_size):
                 new_array = [list(i) for i in columnData.values]
                 tensors += torch.tensor(np.array(new_array), dtype=torch.int)
 
+    print(train_tensors)
     # train_tensors = [torch.tensor(train_data['userId'].values, device=device), torch.tensor(train_data['movieID'].values, device=device)] + [torch.tensor(columnData.values, device=device, dtype=torch.float) for column_name, columnData in train_data.iteritems() if column_name not in ['movieID', 'userId']]
     # test_tensors = [torch.tensor(test_data['userId'].values, device=device), torch.tensor(test_data['movieID'].values, device=device)] + [torch.tensor(columnData.values, device=device, dtype=torch.float) for column_name, columnData in test_data.iteritems() if column_name not in ['movieID', 'userId']]
 
