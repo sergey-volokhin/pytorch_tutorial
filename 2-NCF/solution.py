@@ -24,6 +24,8 @@ class simpleCF(nn.Module):
         genre_emb = self.genre_emb(genre)
         country_emb = self.country_emb(country)
         tags_emb = self.tags_emb(tags)
+        for i in [user_emb, item_emb, genre_emb, country_emb, tags_emb]:
+            print(i.shape)
         concat = torch.cat((user_emb, item_emb, genre_emb, country_emb, tags_emb), -1)
 
         x = self.linear_1(concat)
