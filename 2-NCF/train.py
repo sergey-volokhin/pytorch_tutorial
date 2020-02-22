@@ -72,13 +72,16 @@ def process_data(device, batch_size):
     train_data = user_item_matrix[~user_item_matrix.index.isin(test_data.index)]
 
     # user item stats
-    num_user = len(user_item_matrix['userId'].unique()) + 1  # 611
-    num_item = len(user_item_matrix['movieID'].unique()) + 1  # 5447
-    num_country = len(user_item_matrix['country'].unique()) + 1  # 56
+    # num_user = len(user_item_matrix['userId'].unique()) + 1  # 611
+    # num_item = len(user_item_matrix['movieID'].unique()) + 1  # 5447
+    # num_country = len(user_item_matrix['country'].unique()) + 1  # 56
     # num_genre = len(set(user_item_matrix['genres'].sum())) + 1  # 20
     # num_tags = len(set(user_item_matrix['tags'].sum())) + 1  # 5274
     # print(f"{num_user=}, {num_item=}, {num_country=}, {num_genre=}, {num_tags=}")
-    num_genre = 21
+    num_user = 611
+    num_item = 5447
+    num_country = 56
+    num_genre = 20
     num_tags = 5274
 
     train_tensors = []
@@ -93,7 +96,7 @@ def process_data(device, batch_size):
                     tensors.append(torch.tensor(columnData.values, device=device))
             except TypeError:
                 new_array = [list(i) for i in columnData.values]
-                tensors.append(torch.tensor(np.array(new_array), dtype=torch.int))
+                tensors.append(torch.tensor(np.array(new_array), dtype=torch.long))
 
     # convert tensors to dataloader
     train_dataset = data.TensorDataset(*train_tensors)
