@@ -90,10 +90,10 @@ def process_data(device, batch_size):
         # convert input to torch tensors
         for column_name, columnData in dataset.iteritems():
             try:
-                tensors += torch.tensor(columnData.values, device=device, dtype=torch.float)
+                tensors.append(torch.tensor(columnData.values, device=device, dtype=torch.float))
             except TypeError:
                 new_array = [list(i) for i in columnData.values]
-                tensors += torch.tensor(np.array(new_array), dtype=torch.int)
+                tensors.append(torch.tensor(np.array(new_array), dtype=torch.int))
 
     print(test_tensors)
     # train_tensors = [torch.tensor(train_data['userId'].values, device=device), torch.tensor(train_data['movieID'].values, device=device)] + [torch.tensor(columnData.values, device=device, dtype=torch.float) for column_name, columnData in train_data.iteritems() if column_name not in ['movieID', 'userId']]
