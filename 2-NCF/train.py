@@ -147,7 +147,7 @@ def train(lr, batch_size, output_dim=32):
             genre = genre.to(device)
             country = country.to(device)
 
-            prediction = model(user, item, genre, country)
+            prediction = model(user, item, genre, country, tags)
             label = label.float().detach().cpu().numpy()
             prediction = prediction.float().detach().cpu().numpy()
             test_mae.append(mean_absolute_error(y_pred=prediction, y_true=label))
