@@ -35,6 +35,7 @@ def process_data(device, batch_size):
     user_item_matrix = pd.read_csv(datapath + 'ml-latest-small/ratings.csv', usecols=[0, 1, 2]).rename(columns={'movieId':'movieID'})
     movies = pd.read_csv(datapath + 'ml-latest-small/movies.csv', usecols=[0, 1])
 
+    # adding tags
     movie_tags = pd.read_csv(hetrec + 'movie_tags.dat', sep='\t')
     # movie_tags['list'] = movie_tags.apply(lambda row: [row['tagID']] * row['tagWeight'], axis=1)
     movie_tags['list'] = movie_tags.apply(lambda row: [row['tagID']], axis=1)
@@ -44,6 +45,7 @@ def process_data(device, batch_size):
     to_pad = max(user_item_matrix['tags'].apply(lambda value: len(value)))
     user_item_matrix['tags'] = user_item_matrix['tags'].apply(lambda value: [0]*(to_pad-len(value))+value).apply(lambda x: np.array(x))
 
+    # adding genres
     movie_genres = pd.read_csv(hetrec + 'movie_genres.dat', sep='\t')
     genre_dict = {v: k+1 for k, v in enumerate(movie_genres['genre'].unique())}
     movie_genres['genre'] = movie_genres['genre'].replace(genre_dict)
@@ -53,6 +55,7 @@ def process_data(device, batch_size):
     to_pad = max(user_item_matrix['genres'].apply(lambda value: len(value)))
     user_item_matrix['genres'] = user_item_matrix['genres'].apply(lambda value: [0]*(to_pad-len(value))+value).apply(lambda x: np.array(x))
 
+    # adding countries
     countries = pd.read_csv(hetrec + 'movie_countries.dat', sep='\t')
     user_item_matrix = pd.merge(user_item_matrix, countries, on='movieID').sort_values(by=['userId', 'movieID'])
     country_dict = {v: k+1 for k, v in enumerate(countries['country'].unique())}
@@ -62,11 +65,11 @@ def process_data(device, batch_size):
     new_dict = {a: b+1 for b, a in enumerate(sorted(user_item_matrix['movieID'].unique()))}
     user_item_matrix['movieID'] = user_item_matrix['movieID'].map(new_dict)
 
+    user_item_matrix = user_item_matrix.dropna()
+
     give_test = lambda obj: obj.loc[np.random.choice(obj.index, len(obj.index) // 10), :]
     test_data = user_item_matrix.groupby('userId', as_index=False).apply(give_test).reset_index(level=0, drop=True)
     train_data = user_item_matrix[~user_item_matrix.index.isin(test_data.index)]
-
-    print("ALREADY HERE")
 
     # user item stats
     # num_user = len(user_item_matrix['userId'].unique()) + 1  # 611
