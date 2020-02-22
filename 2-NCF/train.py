@@ -42,7 +42,7 @@ def process_data(device, batch_size):
     user_item_matrix['tags'] = user_item_matrix.apply(lambda row: new_tags.get(row['movieID']), axis=1)
     user_item_matrix = user_item_matrix.dropna()
     to_pad = max(user_item_matrix['tags'].apply(lambda value: len(value)))
-    b = user_item_matrix['tags'].apply(lambda value: [0]*(to_pad-len(value))+value)
+    user_item_matrix['tags'] = user_item_matrix['tags'].apply(lambda value: [0]*(to_pad-len(value))+value).apply(lambda x: np.array(x))
 
     movie_genres = pd.read_csv(hetrec + 'movie_genres.dat', sep='\t')
     genre_dict = {v: k+1 for k, v in enumerate(movie_genres['genre'].unique())}
@@ -51,7 +51,7 @@ def process_data(device, batch_size):
     new_genres = movie_genres.groupby('movieID')['list'].sum()
     user_item_matrix['genres'] = user_item_matrix.apply(lambda row: new_genres.get(row['movieID']), axis=1)
     to_pad = max(user_item_matrix['genres'].apply(lambda value: len(value)))
-    user_item_matrix['genres'] = user_item_matrix['genres'].apply(lambda value: [0]*(to_pad-len(value))+value)
+    user_item_matrix['genres'] = user_item_matrix['genres'].apply(lambda value: [0]*(to_pad-len(value))+value).apply(lambda x: np.array(x))
 
     countries = pd.read_csv(hetrec + 'movie_countries.dat', sep='\t')
     user_item_matrix = pd.merge(user_item_matrix, countries, on='movieID').sort_values(by=['userId', 'movieID'])
