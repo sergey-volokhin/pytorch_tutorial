@@ -84,8 +84,8 @@ def process_data(device, batch_size):
     num_genre = 20
     num_tags = 5274
 
-    print(train_data['genre'].shape)
-    print(type(train_data['genre'].values[0]))
+    print(train_data['genres'].shape)
+    print(type(train_data['genres'].values[0]))
 
     # convert input to torch tensors
     for column_name, columnData in train_data.iteritems():
