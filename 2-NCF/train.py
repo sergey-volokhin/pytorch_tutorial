@@ -95,9 +95,7 @@ def process_data(device, batch_size):
                 new_array = [list(i) for i in columnData.values]
                 tensors.append(torch.tensor(np.array(new_array), dtype=torch.int))
 
-    print(test_tensors)
-    # train_tensors = [torch.tensor(train_data['userId'].values, device=device), torch.tensor(train_data['movieID'].values, device=device)] + [torch.tensor(columnData.values, device=device, dtype=torch.float) for column_name, columnData in train_data.iteritems() if column_name not in ['movieID', 'userId']]
-    # test_tensors = [torch.tensor(test_data['userId'].values, device=device), torch.tensor(test_data['movieID'].values, device=device)] + [torch.tensor(columnData.values, device=device, dtype=torch.float) for column_name, columnData in test_data.iteritems() if column_name not in ['movieID', 'userId']]
+    print(user_item_matrix.columns)
 
     # convert tensors to dataloader
     train_dataset = data.TensorDataset(*train_tensors)
@@ -122,16 +120,17 @@ def train(lr, batch_size, output_dim=32):
         # training loop
         model.train()
 
-        for user, item, label, genre, country in tqdm(train_loader, total=len(train_loader)):
+        for user, item, label, genre, country, tags in tqdm(train_loader, total=len(train_loader)):
             user = user.to(device)
             item = item.to(device)
             genre = genre.to(device)
             country = country.to(device)
+            tags = tags.to(device)
 
             label = label.float().to(device)
             model.zero_grad()
 
-            prediction = model(user, item, genre, country)
+            prediction = model(user, item, genre, country, tags)
             loss = loss_function(prediction, label)
             loss.backward()
             optimizer.step()
