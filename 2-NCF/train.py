@@ -90,7 +90,6 @@ def process_data(device, batch_size):
     for tensors, dataset in [(train_tensors, train_data), (test_tensors, test_data)]:
         # convert input to torch tensors
         for column_name, columnData in dataset.iteritems():
-            print(column_name)
             try:
                 if column_name == 'rating':
                     tensors.append(torch.tensor(columnData.values, device=device, dtype=torch.float))
