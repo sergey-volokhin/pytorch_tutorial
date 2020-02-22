@@ -122,7 +122,7 @@ def train(lr, batch_size, output_dim=32):
         # training loop
         model.train()
 
-        for user, item, label, genre, country, tags in tqdm(train_loader, total=len(train_loader)):
+        for user, item, label, tags, genre, country in tqdm(train_loader, total=len(train_loader)):
             user = user.to(device)
             item = item.to(device)
             genre = genre.to(device)
