@@ -35,17 +35,19 @@ def process_data(device, batch_size):
     user_item_matrix = pd.read_csv(datapath + 'ml-latest-small/ratings.csv', usecols=[0, 1, 2]).rename(columns={'movieId':'movieID'})
     movies = pd.read_csv(datapath + 'ml-latest-small/movies.csv', usecols=[0, 1])
 
-    # adding tags
     movie_tags = pd.read_csv(hetrec + 'movie_tags.dat', sep='\t')
+    movie_tags = movie_tags[movie_tags['movieID'].isin(user_item_matrix['movieID'])]
+    new_dict = {a: b+1 for b, a in enumerate(sorted(movie_tags['tagID'].unique()))}
+    movie_tags['tagID'] = movie_tags['tagID'].map(new_dict)
+
     # movie_tags['list'] = movie_tags.apply(lambda row: [row['tagID']] * row['tagWeight'], axis=1)
     movie_tags['list'] = movie_tags.apply(lambda row: [row['tagID']], axis=1)
     new_tags = movie_tags.groupby('movieID')['list'].sum()
     user_item_matrix['tags'] = user_item_matrix.apply(lambda row: new_tags.get(row['movieID']), axis=1)
     user_item_matrix = user_item_matrix.dropna()
     to_pad = max(user_item_matrix['tags'].apply(lambda value: len(value)))
-    user_item_matrix['tags'] = user_item_matrix['tags'].apply(lambda value: [0]*(to_pad-len(value))+value).apply(lambda x: np.array(x))
+    user_item_matrix['tags'] = user_item_matrix['tags'].apply(lambda value: np.array([0]*(to_pad-len(value))+value))
 
-    # adding genres
     movie_genres = pd.read_csv(hetrec + 'movie_genres.dat', sep='\t')
     genre_dict = {v: k+1 for k, v in enumerate(movie_genres['genre'].unique())}
     movie_genres['genre'] = movie_genres['genre'].replace(genre_dict)
@@ -53,9 +55,8 @@ def process_data(device, batch_size):
     new_genres = movie_genres.groupby('movieID')['list'].sum()
     user_item_matrix['genres'] = user_item_matrix.apply(lambda row: new_genres.get(row['movieID']), axis=1)
     to_pad = max(user_item_matrix['genres'].apply(lambda value: len(value)))
-    user_item_matrix['genres'] = user_item_matrix['genres'].apply(lambda value: [0]*(to_pad-len(value))+value).apply(lambda x: np.array(x))
+    user_item_matrix['genres'] = user_item_matrix['genres'].apply(lambda value: np.array([0]*(to_pad-len(value))+value))
 
-    # adding countries
     countries = pd.read_csv(hetrec + 'movie_countries.dat', sep='\t')
     user_item_matrix = pd.merge(user_item_matrix, countries, on='movieID').sort_values(by=['userId', 'movieID'])
     country_dict = {v: k+1 for k, v in enumerate(countries['country'].unique())}
@@ -64,7 +65,6 @@ def process_data(device, batch_size):
     # remapping movieIDs so that torch stop yelling at me
     new_dict = {a: b+1 for b, a in enumerate(sorted(user_item_matrix['movieID'].unique()))}
     user_item_matrix['movieID'] = user_item_matrix['movieID'].map(new_dict)
-
     user_item_matrix = user_item_matrix.dropna()
 
     give_test = lambda obj: obj.loc[np.random.choice(obj.index, len(obj.index) // 10), :]
