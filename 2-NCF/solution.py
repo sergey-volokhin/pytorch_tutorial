@@ -21,9 +21,9 @@ class simpleCF(nn.Module):
 
         user_emb = self.user_emb(user)
         item_emb = self.item_emb(item)
-        genre_emb = self.genre_emb(genre)
+        genre_emb = torch.sum(self.genre_emb(genre), 0)
         country_emb = self.country_emb(country)
-        tags_emb = self.tags_emb(tags)
+        tags_emb = torch.sum(self.tags_emb(tags), 0)
         for i in [user_emb, item_emb, genre_emb, country_emb, tags_emb]:
             print(i.shape)
         concat = torch.cat((user_emb, item_emb, genre_emb, country_emb, tags_emb), -1)
