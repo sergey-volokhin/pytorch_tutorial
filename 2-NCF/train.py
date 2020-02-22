@@ -58,6 +58,7 @@ def process_data(device, batch_size):
     user_item_matrix['genres'] = user_item_matrix['genres'].apply(lambda value: np.array([0]*(to_pad-len(value))+value))
 
     countries = pd.read_csv(hetrec + 'movie_countries.dat', sep='\t')
+    countries = countries[countries['movieID'].isin(user_item_matrix['movieID'])]
     user_item_matrix = pd.merge(user_item_matrix, countries, on='movieID').sort_values(by=['userId', 'movieID'])
     country_dict = {v: k+1 for k, v in enumerate(countries['country'].unique())}
     user_item_matrix["country"] = user_item_matrix["country"].map(country_dict)
