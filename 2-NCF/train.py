@@ -87,6 +87,7 @@ def process_data(device, batch_size):
     train_tensors = []
     test_tensors = []
     for tensors, dataset in [(train_tensors, train_data), (test_tensors, test_data)]:
+        print(column_name)
         # convert input to torch tensors
         for column_name, columnData in dataset.iteritems():
             try:
