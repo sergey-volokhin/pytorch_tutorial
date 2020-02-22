@@ -86,9 +86,9 @@ def process_data(device, batch_size):
 
     train_tensors = []
     test_tensors = []
-    for tensors, data in [(train_tensors, train_data), (test_tensors, test_data)]:
+    for tensors, dataset in [(train_tensors, train_data), (test_tensors, test_data)]:
         # convert input to torch tensors
-        for column_name, columnData in data.iteritems():
+        for column_name, columnData in dataset.iteritems():
             try:
                 tensors += torch.tensor(columnData.values, device=device, dtype=torch.float)
             except TypeError:
