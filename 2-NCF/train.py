@@ -111,7 +111,6 @@ def process_data(device, batch_size):
 def train(lr, batch_size, output_dim=32):
     train_loader, test_loader, user_num, item_num, genre_num, country_num, tags_num = process_data(device=device, batch_size=batch_size)
 
-    pprint(user_num, item_num, genre_num, country_num, tags_num, output_dim)
     model = simpleCF(user_num, item_num, genre_num, country_num, tags_num, output_dim)
     # def forward(self, user, item, genre, country, tags):
 
