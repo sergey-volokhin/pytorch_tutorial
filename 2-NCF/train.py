@@ -79,11 +79,11 @@ def process_data(device, batch_size):
     # num_genre = len(set(user_item_matrix['genres'].sum())) + 1  # 20
     # num_tags = len(set(user_item_matrix['tags'].sum())) + 1  # 5274
     # print(f"{num_user=}, {num_item=}, {num_country=}, {num_genre=}, {num_tags=}")
-    num_user = 611
-    num_item = 5447
-    num_country = 56
-    num_genre = 20
-    num_tags = 5274
+    num_user = user_item_matrix['userId'].nunique()
+    num_item = user_item_matrix['movieID'].nunique()
+    num_country = user_item_matrix['country'].nunique()
+    num_genre = movie_genres['genre'].nunique() + 1
+    num_tags = movie_tags['tagID'].nunique() + 1
 
     train_tensors = []
     test_tensors = []
@@ -111,6 +111,7 @@ def process_data(device, batch_size):
 def train(lr, batch_size, output_dim=32):
     train_loader, test_loader, user_num, item_num, genre_num, country_num, tags_num = process_data(device=device, batch_size=batch_size)
 
+    pprint(user_num, item_num, genre_num, country_num, tags_num, output_dim)
     model = simpleCF(user_num, item_num, genre_num, country_num, tags_num, output_dim)
     # def forward(self, user, item, genre, country, tags):
 
