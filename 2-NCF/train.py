@@ -73,7 +73,7 @@ def process_data(device, batch_size):
 
     # convert input to torch tensors
     for column_name, columnData in train_data.iteritems():
-        print(column_name)
+        print(column_name, columnData.dtype)
         try:
             torch.tensor(columnData.values, device=device, dtype=torch.float)
         except TypeError:
