@@ -79,9 +79,9 @@ def process_data(device, batch_size):
     # num_genre = len(set(user_item_matrix['genres'].sum())) + 1  # 20
     # num_tags = len(set(user_item_matrix['tags'].sum())) + 1  # 5274
     # print(f"{num_user=}, {num_item=}, {num_country=}, {num_genre=}, {num_tags=}")
-    num_user = user_item_matrix['userId'].nunique()
-    num_item = user_item_matrix['movieID'].nunique()
-    num_country = user_item_matrix['country'].nunique()
+    num_user = user_item_matrix['userId'].nunique() + 1
+    num_item = user_item_matrix['movieID'].nunique() + 1
+    num_country = user_item_matrix['country'].nunique() + 1
     num_genre = movie_genres['genre'].nunique() + 1
     num_tags = movie_tags['tagID'].nunique() + 1
 
