@@ -141,7 +141,7 @@ def train(lr, batch_size, output_dim=32):
         test_mae = []
         model.eval()
 
-        for user, item, label, genre, country in test_loader:
+        for user, item, label, tags, genre, country in test_loader:
             user = user.to(device)
             item = item.to(device)
             genre = genre.to(device)
